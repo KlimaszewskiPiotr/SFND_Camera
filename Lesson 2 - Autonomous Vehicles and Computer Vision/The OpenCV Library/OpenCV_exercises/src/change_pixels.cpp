@@ -11,10 +11,14 @@ void changePixels()
     int nrows = 480, ncols = 640;
     cv::Mat m1_8u;
     m1_8u.create(nrows, ncols, CV_8UC1); // two-channel matrix with 8bit unsigned elements
-    m1_8u.setTo(cv::Scalar(0));          //black
+    m1_8u.setTo(cv::Scalar(255));          //black
 
     for (int r = 230; r < 250; r++)
     {
+        for(int col = 0; col < ncols; ++col)
+        {
+            m1_8u.at<cv::Scalar>(r,col) = cv::Scalar(0);
+        }
         // STUDENT TASK : loop over all columns and set matrix elements to 255
 
     }

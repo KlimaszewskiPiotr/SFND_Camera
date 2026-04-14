@@ -1,2 +1,32 @@
 **.DS_Store
 **.vscode
+
+# Build directories
+**/build/
+**/cmake_build/
+**/out/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.cmake
+Makefile
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*.out
+
+# IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
