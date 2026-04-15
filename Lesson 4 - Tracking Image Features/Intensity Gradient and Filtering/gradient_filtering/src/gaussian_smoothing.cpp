@@ -18,8 +18,16 @@ void gaussianSmoothing1()
                             7, 26, 41, 26, 7,
                             4, 16, 26, 16, 4,
                             1, 4, 7, 4, 1};
+
+                      
     cv::Mat kernel = cv::Mat(5, 5, CV_32F, gauss_data);
-  
+      
+    float sum = accumulate(gauss_data,gauss_data+25,0);
+    for(int i = 0;i<25;++i)
+    {
+      gauss_data[i] /= sum;
+    }
+
   	// TODO: Divide each element of the kernel by the sum of all the values in the kernel.
 
     // apply filter

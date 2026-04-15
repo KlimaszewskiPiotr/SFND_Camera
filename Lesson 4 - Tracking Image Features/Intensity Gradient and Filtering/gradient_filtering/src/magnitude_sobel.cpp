@@ -10,26 +10,51 @@ void magnitudeSobel()
 {
     // load image from file
     cv::Mat img;
-    img = cv::imread("./images/img1gray.png");
+    img = cv::imread("../images/img1gray.png");
 
     // convert image to grayscale
     cv::Mat imgGray;
     cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
 
+
+    
     // apply smoothing using the GaussianBlur() function from the OpenCV
     // ToDo : Add your code here
+    cv::Mat gaussian_blur;
+    cv::GaussianBlur(imgGray, gaussian_blur, cv::Size(5, 5), 0);
+
 
     // create filter kernels using the cv::Mat datatype both for x and y
     // ToDo : Add your code here
+    float sobel_x[9] = {-1, 0, +1,
+                        -2, 0, +2, 
+                        -1, 0, +1};
+    cv::Mat kernel_x = cv::Mat(3, 3, CV_32F, sobel_x);
+
+    float sobel_y[9] = {-1, -2, -1,
+                        0, 0, 0, 
+                        +1, +2, +1};
+    cv::Mat kernel_y = cv::Mat(3, 3, CV_32F, sobel_y);
 
     // apply filter using the OpenCv function filter2D()
     // ToDo : Add your code here
-    
+    cv::Mat result_x;
+    cv::filter2D(gaussian_blur, result_x,-1,kernel_x,cv::Point(-1,-1),0,cv::BORDER_DEFAULT);
+
+    cv::Mat result_y;
+    cv::filter2D(gaussian_blur, result_y,-1,kernel_y,cv::Point(-1,-1),0,cv::BORDER_DEFAULT);
 
     // compute magnitude image based on the equation presented in the lesson 
     // ToDo : Add your code here
-    
-
+    cv::Mat magnitude = imgGray.clone();
+    for(auto rows = 0;rows < magnitude.rows;++rows)
+    {
+        for(auto col = 0;col < magnitude.cols;++col)
+        {
+            magnitude.at<unsigned char>(rows,col) = sqrt(pow(result_x.at<unsigned char>(rows,col),2)+ 
+                                                        pow(result_y.at<unsigned char>(rows,col),2));
+        }
+    }
     // show result
     string windowName = "Gaussian Blurring";
     cv::namedWindow(windowName, 1); // create window

@@ -38,6 +38,50 @@ void cornernessHarris()
     // each maximum. The resulting coordinates shall be stored in a list of keypoints 
     // of the type `vector<cv::KeyPoint>`.
 
+    vector<cv::KeyPoint> keypoints;
+    double maxOverlap = 0.0;
+
+    for(auto rows = 0;rows < dst_norm.rows; ++rows)
+    {
+        for(auto col = 0;col < dst_norm.cols; ++col)
+        {
+            int response = (int)dst_norm.at<float>(rows,col);
+            if(response > minResponse)
+            {
+                cv::KeyPoint newKeyPoint;
+                newKeyPoint.pt = cv::Point2f(col,rows);
+                newKeyPoint.size = 2*apertureSize;
+                newKeyPoint.response = response;
+
+                bool overlap = false;
+                for(auto it = keypoints.begin();it!= keypoints.end();++it)
+                {
+                    double overlapPar = cv::KeyPoint::overlap(newKeyPoint, *it);
+                    if(overlapPar > maxOverlap)
+                    {
+                        overlap = true;
+                        if(newKeyPoint.response > (*it).response)
+                        {
+                            *it = newKeyPoint;
+                            break;
+                        }
+                    }
+                }
+                if(!overlap)
+                {
+                    keypoints.push_back(newKeyPoint);
+                }
+                
+            }
+        }
+    }
+    windowName = "Harris Corner Detection Results";
+    cv::namedWindow(windowName,5);
+    cv::Mat visImage = dst_norm_scaled.clone();
+    cv::drawKeypoints(dst_norm_scaled,keypoints,visImage,cv::Scalar::all(-1),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    cv::imshow(windowName, visImage);
+    cv::waitKey(0);
+
 }
 
 int main()
