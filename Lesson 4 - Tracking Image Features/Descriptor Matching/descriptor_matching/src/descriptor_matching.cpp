@@ -19,7 +19,6 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
 
     if (matcherType.compare("MAT_BF") == 0)
     {
-
         int normType = descriptorType.compare("DES_BINARY") == 0 ? cv::NORM_HAMMING : cv::NORM_L2;
         matcher = cv::BFMatcher::create(normType, crossCheck);
         cout << "BF matching cross-check=" << crossCheck;
@@ -31,8 +30,7 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
             descSource.convertTo(descSource, CV_32F);
             descRef.convertTo(descRef, CV_32F);
         }
-
-        //... TODO : implement FLANN matching
+        matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
         cout << "FLANN matching";
     }
 
@@ -48,9 +46,25 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
     else if (selectorType.compare("SEL_KNN") == 0)
     { // k nearest neighbors (k=2)
 
-        // TODO : implement k-nearest-neighbor matching
-
-        // TODO : filter matches using descriptor distance ratio test
+        vector<vector<cv::DMatch>> knnMatches;
+        double t = (double)cv::getTickCount();
+        matcher->knnMatch(descSource, descRef, knnMatches, 2);
+        t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+        cout << " (KNN with k = 2) with n=" << knnMatches.size() << " matches in " << 1000 * t / 1.0 << " ms" << endl;
+        
+        // filter matches using descriptor distance ratio test
+        const float ratioThresh = 0.8f;
+        for (size_t i = 0; i < knnMatches.size(); i++)
+        {
+            if (knnMatches[i].size() == 2)
+            {
+                if (knnMatches[i][0].distance < ratioThresh * knnMatches[i][1].distance)
+                {
+                    matches.push_back(knnMatches[i][0]);
+                }
+            }
+        }
+        cout << "Number of keypoints after Lowe fitlering " << knnMatches.size() - matches.size() << ".\n";
     }
 
     // visualize results
@@ -80,6 +94,6 @@ int main()
     vector<cv::DMatch> matches;
     string matcherType = "MAT_BF"; 
     string descriptorType = "DES_BINARY"; 
-    string selectorType = "SEL_NN"; 
+    string selectorType = "SEL_KNN"; 
     matchDescriptors(imgSource, imgRef, kptsSource, kptsRef, descSource, descRef, matches, descriptorType, matcherType, selectorType);
 }
